@@ -12,54 +12,58 @@ from  .models import *
 
 import json
 
+# Fetches a reflection from the DB
+def fetchReflection(reflectionId):
+	try:
+		reflection = Reflection.objects.get(pk=reflectionId)
+		return reflection
+	except ObjectDoesNotExist:
+		return False
 
+# Formats a reflection from the DB
 def formattedModel(m):
 
 		serialized = json.dumps(m.toDict())
 		return HttpResponse(serialized)
-
-def getAllReflections(): 
+def returnAllReflections(): 
 	asDict = [ i.toDict() for i in Reflection.objects.all()]
 
 	serialized = json.dumps(asDict)
 	return HttpResponse(serialized)
 
-def deleteReflection(reflectionId): pass # TODO
-def updateReflection(reflectionId, newReflection): pass # TODO
-
-def getReflection(reflectionId):
-		try:
-			reflection = Reflection.objects.get(pk=reflectionId)
-			return formattedModel(reflection)
-
-		except ObjectDoesNotExist:
-			# TODO
-			return HttpResponse(f'PEGUEI')
-
+# Reflections CRUD
 def createReflection(text): 
 	newReflection = Reflection(content = text)
 	newReflection.save()
 
 	return  getReflection(newReflection.pk)
+def getReflection(reflectionId):
+	reflection = fetchReflection(reflectionId)
+
+	if not reflection: return HttpResponse(f'PEGUEI')
+
+	return formattedModel(reflection)
+def updateReflection(reflectionId, newReflection): pass # TODO
+def deleteReflection(reflectionId): 
+	reflection = fetchReflection(reflectionId)
+	if not reflection: return HttpResponse(f'PEGUEI')
+
+	reflection.delete()
+
+	return returnAllReflections()
 
 @csrf_exempt 
 def reflections(request, reflectionId = None):
 	if reflectionId == None: 
-		if request.method == 'GET': return getAllReflections()
-		if request.method == 'DELETE': return deleteReflection(reflectionId) # TODO
-		if request.method == 'POST': 
-
-			data = request.POST
-			content = data.get('content')
-
-			return createReflection(content) # TODO
-
-
-		if request.method == 'PUT': pass # TODO
-
+		if request.method == 'GET': return returnAllReflections()
+		if request.method == 'POST': return createReflection(request.POST.get('content'))
+		
 		return HttpResponseForbidden('Wrong method, sorry')
-	if request.method == 'GET': # Se tem id e é um GET, 
-		return getReflection(reflectionId)
 
+	if request.method == 'GET': return getReflection(reflectionId)
+	if request.method == 'DELETE': return deleteReflection(reflectionId) # TODO
+	if request.method == 'PUT': pass # TODO
+		
+		
 
 	return HttpResponseForbidden('Wrong method, sorry')
