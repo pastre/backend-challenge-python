@@ -26,6 +26,7 @@ SECRET_KEY = "6)fer=_n-5_&i@ms*v%$ot$r=6i-ki@$=$m(b12gmbsp$b$ng*"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     # http://whitenoise.evans.io/en/stable/django.html#using-whitenoise-in-development
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    "sslserver",
 ]
 
 MIDDLEWARE = [
