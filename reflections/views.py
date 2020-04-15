@@ -9,17 +9,36 @@ def formattedModel(m):
 		serialized = serializers.serialize('json', m)
 		return HttpResponse(serialized)
 
+def getAllReflections(): return formattedModel(Reflection.objects.all())
+def deleteReflection(reflectionId): pass # TODO
+def updateReflection(reflectionId, newReflection): pass # TODO
+
+def getReflection(reflectionId):
+		reflection = Reflection.objects.get(pk=reflectionId).first()
+		return formattedModel(reflection)
+
+def createReflection(text): pass # TODO
+
+
 def reflections(request, reflectionId = None):
-	if reflectionId == None:
-		if request.method != 'GET': return HttpResponseForbidden('Wrong method, sorry')
+	if reflectionId == None: 
+		if request.method == 'GET': return getAllReflections()
+		if request.method == 'DELETE': deleteReflection(reflectionId) # TODO
+		if request.method == 'POST': updateReflection(reflectionId) # TODO
 
-		return formattedModel(Reflection.objects.all())
+		return HttpResponseForbidden('Wrong method, sorry')
 
-	if request.method == 'GET':
+		
+
+	if request.method == 'GET': # Se tem id e é um GET, 
 		try:
-			reflection = Reflection.objects.get(pk=reflectionId).first()
-			return formattedModel(reflection)
+			return getReflection(reflectionId)
 		except ObjectDoesNotExist:
+			# TODO
 			return HttpResponse(f'PEGUEI')
 
-	return HttpResponse(f'<h1>NOME TOSCO {reflectionId}</h1>')
+
+	if request.method == 'PUT':
+		return createReflection()
+
+	return HttpResponseForbidden('Wrong method, sorry')
