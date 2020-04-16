@@ -39,9 +39,10 @@ def reflectionsInRange(params):
 	start = datetime.datetime.strptime(params["from"][0], "%d%m%Y")
 	# start = stringToDatetime(params["from"][0])
 
-	if "to" in params.keys(): end = datetime.datetime.strptime(params["to"][0], "%d%m%Y")
+	if "to" in params.keys(): end = datetime.datetime.strptime(params["to"][0] + " 23:59:59", "%d%m%Y %H:%M:%S")
 	else: end = datetime.datetime.now()
 
+	print("Range: ", start, end)
 	reflections = Reflection.objects.filter(createdAt__range = (start, end))
 
 	print(reflections)
@@ -77,7 +78,7 @@ def reflections(request, reflectionId = None):
 			params = dict(request.GET)
 			if len(params.keys()) == 0: return formattedReflections(Reflection.objects.all())
 			return reflectionsInRange(params)
-			
+
 		if request.method == 'POST': return createReflection(request.POST.get('content'))
 		
 		return HttpResponseForbidden('Wrong method, sorry')
