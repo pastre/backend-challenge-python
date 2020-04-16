@@ -131,15 +131,16 @@ def deleteUserIfPossible(userId):
 @csrf_exempt 
 def users(request, userId = None):
 	# Se nao for post, retorne erro
-	if not userId == None:
-		if not request.method == 'DELETE': return wrongMethod()
-		
-		return deleteUserIfPossible(userId)
+	if userId == None:
+		if request.method == 'POST': return createUserIfPossible(request)
+		return wrongMethod()
+
+	if request.method == 'DELETE': return deleteUserIfPossible(userId)
+	
+	return wrongMethod()
+	
 
 
 
-
-	if not request.method == 'POST'	: return wrongMethod()
-	return createUserIfPossible(request)
 
 
