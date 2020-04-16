@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from  .models import *
 
 import json
+import datetime
 
 # Fetches a reflection from the DB
 def fetchReflection(reflectionId):
@@ -25,11 +26,27 @@ def formattedModel(m):
 
 		serialized = json.dumps(m.toDict())
 		return HttpResponse(serialized)
-def returnAllReflections(): 
-	asDict = [ i.toDict() for i in Reflection.objects.all()]
+def formattedReflections(reflections): 
+	asDict = [ i.toDict() for i in reflections]
 
 	serialized = json.dumps(asDict)
 	return HttpResponse(serialized)
+
+def reflectionsInRange(params):
+
+	if not 'from' in params.keys(): return HttpResponse(f'PEGUEI')
+
+	start = datetime.datetime.strptime(params["from"][0], "%d%m%Y")
+	# start = stringToDatetime(params["from"][0])
+
+	if "to" in params.keys(): end = datetime.datetime.strptime(params["to"][0], "%d%m%Y")
+	else: end = datetime.datetime.now()
+
+	reflections = Reflection.objects.filter(createdAt__range = (start, end))
+
+	print(reflections)
+	return formattedReflections(reflections)
+
 
 # Reflections CRUD
 def createReflection(text): 
@@ -50,12 +67,17 @@ def deleteReflection(reflectionId):
 
 	reflection.delete()
 
-	return returnAllReflections()
+	return formattedReflections(Reflection.objects.all())
 
 @csrf_exempt 
 def reflections(request, reflectionId = None):
+	
 	if reflectionId == None: 
-		if request.method == 'GET': return returnAllReflections()
+		if request.method == 'GET': 
+			params = dict(request.GET)
+			if len(params.keys()) == 0: return formattedReflections(Reflection.objects.all())
+			return reflectionsInRange(params)
+			
 		if request.method == 'POST': return createReflection(request.POST.get('content'))
 		
 		return HttpResponseForbidden('Wrong method, sorry')
