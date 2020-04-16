@@ -14,16 +14,21 @@ from  .models import *
 import json
 import datetime
 
+def fetchObject(obj, objId):
+
+	try:
+		ret = obj.objects.get(pk=objId)
+		return ret
+	except ObjectDoesNotExist:
+		return False
+
+
 def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
 def malformedRequest(): return HttpResponse(f'malformedRequest')
 def error(message): return HttpResponse(json.dumps({"error": message}))
 # Fetches a reflection from the DB
 def fetchReflection(reflectionId):
-	try:
-		reflection = Reflection.objects.get(pk=reflectionId)
-		return reflection
-	except ObjectDoesNotExist:
-		return False
+	return fetchObject(Reflection, reflectionId)
 
 # Formats a reflection from the DB
 def formattedModel(m):
@@ -97,10 +102,10 @@ def reflections(request, reflectionId = None):
 	return wrongMethod()
 
 
-@csrf_exempt 
-def users(request):
-	# Se nao for post, retorne erro
-	if request.method != 'POST'	: return wrongMethod()
+def fetchUser(userId):
+	return fetchObject(User, userId)
+
+def createUserIfPossible(request):
 	payload = request.POST
 	required = ['username', 'email', 'password',]
 	
@@ -109,13 +114,32 @@ def users(request):
 		if not req in payload.keys(): return malformedRequest()
 
 	username, email, password = [payload.get(i) for i in required]
-	
+
 	try:
 		user = User.objects.create_user(username = username, email=email, password=password )
 		user.save()
 
 		return formattedModel(user)
 	except IntegrityError: return error("User already exists")
+def deleteUserIfPossible(userId):
+	user = fetchUser(userId)
 
+	if not user: return error("User not found!")
+	user.delete()
+	return formattedModel(user)
+
+@csrf_exempt 
+def users(request, userId = None):
+	# Se nao for post, retorne erro
+	if not userId == None:
+		if not request.method == 'DELETE': return wrongMethod()
+		
+		return deleteUserIfPossible(userId)
+
+
+
+
+	if not request.method == 'POST'	: return wrongMethod()
+	return createUserIfPossible(request)
 
 

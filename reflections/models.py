@@ -18,7 +18,7 @@ class Reflection(Model):
 class User(AbstractUser): 
 	def toDict(self):
 		return {
-
+			"username": self.username,
 			"id": self.pk,
 			"email": self.email,
 
