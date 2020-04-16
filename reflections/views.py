@@ -8,11 +8,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.csrf import csrf_exempt
 
+from django.db.utils import IntegrityError 
 from  .models import *
 
 import json
 import datetime
 
+def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
+def malformedRequest(): return HttpResponse(f'malformedRequest')
+def error(message): return HttpResponse(json.dumps({"error": message}))
 # Fetches a reflection from the DB
 def fetchReflection(reflectionId):
 	try:
@@ -34,7 +38,7 @@ def formattedReflections(reflections):
 
 def reflectionsInRange(params):
 
-	if not 'from' in params.keys(): return HttpResponse(f'PEGUEI')
+	if not 'from' in params.keys(): return malformedRequest()
 
 	start = datetime.datetime.strptime(params["from"][0], "%d%m%Y")
 	# start = stringToDatetime(params["from"][0])
@@ -58,13 +62,13 @@ def createReflection(text):
 def getReflection(reflectionId):
 	reflection = fetchReflection(reflectionId)
 
-	if not reflection: return HttpResponse(f'PEGUEI')
+	if not reflection: return malformedRequest()
 
 	return formattedModel(reflection)
 def updateReflection(reflectionId, newReflection): pass # TODO
 def deleteReflection(reflectionId): 
 	reflection = fetchReflection(reflectionId)
-	if not reflection: return HttpResponse(f'PEGUEI')
+	if not reflection: return malformedRequest()
 
 	reflection.delete()
 
@@ -79,9 +83,10 @@ def reflections(request, reflectionId = None):
 			if len(params.keys()) == 0: return formattedReflections(Reflection.objects.all())
 			return reflectionsInRange(params)
 
+		if not 'content' in request.POST.keys(): return malformedRequest()
 		if request.method == 'POST': return createReflection(request.POST.get('content'))
 		
-		return HttpResponseForbidden('Wrong method, sorry')
+		return wrongMethod()
 
 	if request.method == 'GET': return getReflection(reflectionId)
 	if request.method == 'DELETE': return deleteReflection(reflectionId) # TODO
@@ -89,4 +94,28 @@ def reflections(request, reflectionId = None):
 		
 		
 
-	return HttpResponseForbidden('Wrong method, sorry')
+	return wrongMethod()
+
+
+@csrf_exempt 
+def users(request):
+	# Se nao for post, retorne erro
+	if request.method != 'POST'	: return wrongMethod()
+	payload = request.POST
+	required = ['username', 'email', 'password',]
+	
+	# Se esta faltando algum parametro, retorne erro
+	for req in required: 
+		if not req in payload.keys(): return malformedRequest()
+
+	username, email, password = [payload.get(i) for i in required]
+	
+	try:
+		user = User.objects.create_user(username = username, email=email, password=password )
+		user.save()
+
+		return formattedModel(user)
+	except IntegrityError: return error("User already exists")
+
+
+
