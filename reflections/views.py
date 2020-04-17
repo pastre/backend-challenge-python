@@ -27,7 +27,10 @@ def fetchObject(obj, objId):
 	except ObjectDoesNotExist:
 		return False
 
-def payload(message, status): return HttpResponse(json.dumps({"status": status, "payload": message}))
+def payload(message, status):
+	return HttpResponse(
+		json.dumps( {"status": status, "payload": message} if not message == None else { "status": status } )
+	) 
 def error(message): return payload(message, "error")
 def success(message): return payload(message, "success")
 
