@@ -185,7 +185,6 @@ def auth(request):
 	else: return error("Authentication failed")
 
 
-
 @csrf_exempt
 def logout(request):
 	djangoLogout(request)
