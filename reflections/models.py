@@ -5,6 +5,9 @@ from django.contrib.auth.models import User as AbstractUser
 class Reflection(Model):
 	content = CharField(max_length = 10000)
 	createdAt = DateTimeField(null=True, blank=True, auto_now = True)
+	
+	owner = ForeignKey(User, on_delete = CASCADE, null  = True)
+	sharedWith = ArrayField(ForeignKey(User, on_delete = CASCADE, null  = True), null=True, blank=True)
 
 	def toDict(self):
 		return  {
