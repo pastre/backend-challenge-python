@@ -131,6 +131,9 @@ def createUserIfPossible(request):
 		user = User.objects.create_user(username = username, email=email, password=password )
 		user.save()
 
+		
+		login(request, user)
+
 		return formattedModel(user)
 	except IntegrityError: return error("User already exists")
 def deleteUserIfPossible(userId):

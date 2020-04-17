@@ -23,6 +23,5 @@ class Reflection(Model):
 			"id": self.pk,
 			"content": self.content,
 			"createdAt": self.createdAt.timestamp(),
-
 		}
 
