@@ -68,15 +68,16 @@ def reflectionsInRange(params):
 		return error("Failed to parse date")
 
 # -------- Reflection methods
-def createReflection(text): 
-	newReflection = Reflection(content = text)
+def createReflection(text, owner): 
+	newReflection = Reflection(content = text, owner = owner)
 	newReflection.save()
 
 	return  getReflection(newReflection.pk)
-def getReflection(reflectionId):
+def getReflection(reflectionId, user):
 	reflection = fetchReflection(reflectionId)
 
 	if not reflection: return malformedRequest()
+	if not reflection.owner == user: return error("Not authorized")
 
 	return formattedModel(reflection)
 def updateReflection(reflectionId, newReflection): pass # TODO
@@ -87,6 +88,8 @@ def deleteReflection(reflectionId):
 	reflection.delete()
 
 	return formattedModelArray(Reflection.objects.all())
+def getReflections(user):
+	return Reflection.objects.filter(owner = user)
 
 @csrf_exempt 
 def reflections(request, reflectionId = None):
@@ -96,18 +99,18 @@ def reflections(request, reflectionId = None):
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
-			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.all())
+			if len(params.keys()) == 0: return formattedModelArray(getReflections(request.user))
 			return reflectionsInRange(params)
 
 		if request.method == 'POST': 
 			content = request.POST.get("content")
 
 			if not content: return error("porra brow")
-			return createReflection(content)
+			return createReflection(content, request.user)
 		
 		return wrongMethod()
 
-	if request.method == 'GET': return getReflection(reflectionId)
+	if request.method == 'GET': return getReflection(reflectionId, request.user)
 	if request.method == 'DELETE': return deleteReflection(reflectionId) # TODO
 	if request.method == 'PUT': pass # TODO
 		
@@ -131,7 +134,7 @@ def createUserIfPossible(request):
 		user = User.objects.create_user(username = username, email=email, password=password )
 		user.save()
 
-		
+
 		login(request, user)
 
 		return formattedModel(user)

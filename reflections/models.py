@@ -3,7 +3,12 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User as AbstractUser
 
 # Entrypoint para extendermos um usuario
-class User(AbstractUser): 
+class User(AbstractUser):
+
+	class Meta:
+		proxy = True
+		ordering = ('username', )
+
 	def toDict(self):
 		return {
 			"username": self.username,
