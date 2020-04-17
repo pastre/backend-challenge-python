@@ -9,6 +9,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.csrf import csrf_exempt
 
 from django.db.utils import IntegrityError 
+
+from django.contrib.auth.decorators import login_required
+
 from  .models import *
 
 import json
@@ -26,6 +29,8 @@ def fetchObject(obj, objId):
 def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
 def malformedRequest(): return HttpResponse(f'malformedRequest')
 def error(message): return HttpResponse(json.dumps({"error": message}))
+def authenticationNeeded(): return error("Authentication required")
+
 # Fetches a reflection from the DB
 def fetchReflection(reflectionId):
 	return fetchObject(Reflection, reflectionId)
@@ -81,14 +86,19 @@ def deleteReflection(reflectionId):
 @csrf_exempt 
 def reflections(request, reflectionId = None):
 	
+	if not request.user.is_authenticated: return authenticationNeeded()
+	
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
 			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.all())
 			return reflectionsInRange(params)
 
-		if not 'content' in request.POST.keys(): return malformedRequest()
-		if request.method == 'POST': return createReflection(request.POST.get('content'))
+		if request.method == 'POST': 
+			content = request.POST.get("content")
+
+			if not content: return error("porra brow")
+			return createReflection(content)
 		
 		return wrongMethod()
 
@@ -136,16 +146,20 @@ def usersInRange(params):
 
 @csrf_exempt 
 def users(request, userId = None):
+	isAuth = request.user.is_authenticated
 	# Se nao for post, retorne erro
 	if userId == None:
 		if request.method == 'GET': 
+			if not isAuth: return authenticationNeeded()
 			params = dict(request.GET)
 			if len(params.keys()) == 0: return malformedRequest("Use the <i>username</i> parameter to search a user")
 			return usersInRange(params)
 
 		if request.method == 'POST': return createUserIfPossible(request)
+
 		return wrongMethod()
 
+	if not isAuth: return authenticationNeeded()
 	if request.method == 'DELETE': return deleteUserIfPossible(userId)
 	
 	return wrongMethod()
