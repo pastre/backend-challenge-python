@@ -77,17 +77,9 @@ def getReflection(reflectionId, user):
 	reflection = fetchReflection(reflectionId)
 
 	if not reflection: return malformedRequest()
-	if not reflection.owner == user: return error("Not authorized")
 
-	return formattedModel(reflection)
+	
 def updateReflection(reflectionId, newReflection): pass # TODO
-def deleteReflection(reflectionId): 
-	reflection = fetchReflection(reflectionId)
-	if not reflection: return malformedRequest()
-
-	reflection.delete()
-
-	return formattedModelArray(Reflection.objects.all())
 def getReflections(user):
 	return Reflection.objects.filter(owner = user)
 
@@ -110,9 +102,17 @@ def reflections(request, reflectionId = None):
 		
 		return wrongMethod()
 
-	if request.method == 'GET': return getReflection(reflectionId, request.user)
-	if request.method == 'DELETE': return deleteReflection(reflectionId) # TODO
+
+	reflection = fetchReflection(reflectionId)
+	if not reflection: return malformedRequest()
+	if not reflection.owner == request.user: return error("Not authorized")
+
 	if request.method == 'PUT': pass # TODO
+	if request.method == 'GET': return formattedModel(reflection)
+	if request.method == 'DELETE':
+		reflection.delete()
+		return formattedModelArray(getReflections(request.user))
+
 		
 		
 
