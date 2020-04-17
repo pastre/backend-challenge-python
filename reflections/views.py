@@ -11,6 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.utils import IntegrityError 
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import  logout as djangoLogout
 
 from  .models import *
 
@@ -25,10 +27,12 @@ def fetchObject(obj, objId):
 	except ObjectDoesNotExist:
 		return False
 
+def payload(message, status): return HttpResponse(json.dumps({"status": status, "payload": message}))
+def error(message): return payload(message, "error")
+def success(message): return payload(message, "success")
 
 def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
 def malformedRequest(): return HttpResponse(f'malformedRequest')
-def error(message): return HttpResponse(json.dumps({"error": message}))
 def authenticationNeeded(): return error("Authentication required")
 
 # Fetches a reflection from the DB
@@ -43,26 +47,24 @@ def formattedModel(m):
 def formattedModelArray(a): 
 	asDict = [ i.toDict() for i in a]
 
-	serialized = json.dumps(asDict)
-	return HttpResponse(serialized)
+	return success(asDict)
 def reflectionsInRange(params):
 
 	if not 'from' in params.keys(): return malformedRequest()
+	try:
+		start = datetime.datetime.strptime(params["from"][0], "%d%m%Y")
+		# start = stringToDatetime(params["from"][0])
 
-	start = datetime.datetime.strptime(params["from"][0], "%d%m%Y")
-	# start = stringToDatetime(params["from"][0])
+		if "to" in params.keys(): end = datetime.datetime.strptime(params["to"][0] + " 23:59:59", "%d%m%Y %H:%M:%S")
+		else: end = datetime.datetime.now()
 
-	if "to" in params.keys(): end = datetime.datetime.strptime(params["to"][0] + " 23:59:59", "%d%m%Y %H:%M:%S")
-	else: end = datetime.datetime.now()
+		reflections = Reflection.objects.filter(createdAt__range = (start, end))
 
-	print("Range: ", start, end)
-	reflections = Reflection.objects.filter(createdAt__range = (start, end))
+		return formattedModelArray(reflections)
+	except ValueError:
+		return error("Failed to parse date")
 
-	print(reflections)
-	return formattedModelArray(reflections)
-
-
-# Reflections CRUD
+# -------- Reflection methods
 def createReflection(text): 
 	newReflection = Reflection(content = text)
 	newReflection.save()
@@ -87,7 +89,7 @@ def deleteReflection(reflectionId):
 def reflections(request, reflectionId = None):
 	
 	if not request.user.is_authenticated: return authenticationNeeded()
-	
+
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
@@ -110,7 +112,7 @@ def reflections(request, reflectionId = None):
 
 	return wrongMethod()
 
-
+# -------- User methods
 def fetchUser(userId): return fetchObject(User, userId)
 def createUserIfPossible(request):
 	payload = request.POST
@@ -137,9 +139,7 @@ def deleteUserIfPossible(userId):
 def usersInRange(params):
 	if 'username' in params.keys(): 
 		pattern = params["username"][0]
-		print("PATTERN", pattern)
 		users = User.objects.filter(username__contains=pattern)
-		print("USERS", users)
 
 		return formattedModelArray(users)
 	return malformedRequest("Use the <i>username</i> parameter to search a user")
@@ -165,7 +165,26 @@ def users(request, userId = None):
 	return wrongMethod()
 	
 
+# -------- Auth methods
+@csrf_exempt
+def auth(request):
+	if not request.method == 'POST': wrongMethod()
+
+	username = request.POST['username']
+	password = request.POST['password']
+	user = authenticate(request, username=username, password=password)
+
+	if user is not None:
+		login(request, user)
+		myUser = User.objects.get(pk = user.pk)
+		return success({"user": myUser.toDict()})
+
+	else: return error("Authentication failed")
 
 
 
+@csrf_exempt
+def logout(request):
+	djangoLogout(request)
 
+	return success(None)
