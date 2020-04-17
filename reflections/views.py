@@ -35,12 +35,11 @@ def formattedModel(m):
 
 		serialized = json.dumps(m.toDict())
 		return HttpResponse(serialized)
-def formattedReflections(reflections): 
-	asDict = [ i.toDict() for i in reflections]
+def formattedModelArray(a): 
+	asDict = [ i.toDict() for i in a]
 
 	serialized = json.dumps(asDict)
 	return HttpResponse(serialized)
-
 def reflectionsInRange(params):
 
 	if not 'from' in params.keys(): return malformedRequest()
@@ -55,7 +54,7 @@ def reflectionsInRange(params):
 	reflections = Reflection.objects.filter(createdAt__range = (start, end))
 
 	print(reflections)
-	return formattedReflections(reflections)
+	return formattedModelArray(reflections)
 
 
 # Reflections CRUD
@@ -77,7 +76,7 @@ def deleteReflection(reflectionId):
 
 	reflection.delete()
 
-	return formattedReflections(Reflection.objects.all())
+	return formattedModelArray(Reflection.objects.all())
 
 @csrf_exempt 
 def reflections(request, reflectionId = None):
@@ -85,7 +84,7 @@ def reflections(request, reflectionId = None):
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
-			if len(params.keys()) == 0: return formattedReflections(Reflection.objects.all())
+			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.all())
 			return reflectionsInRange(params)
 
 		if not 'content' in request.POST.keys(): return malformedRequest()
@@ -125,11 +124,25 @@ def deleteUserIfPossible(userId):
 	if not user: return error("User not found!")
 	user.delete()
 	return formattedModel(user)
+def usersInRange(params):
+	if 'username' in params.keys(): 
+		pattern = params["username"][0]
+		print("PATTERN", pattern)
+		users = User.objects.filter(username__contains=pattern)
+		print("USERS", users)
+
+		return formattedModelArray(users)
+	return malformedRequest("Use the <i>username</i> parameter to search a user")
 
 @csrf_exempt 
 def users(request, userId = None):
 	# Se nao for post, retorne erro
 	if userId == None:
+		if request.method == 'GET': 
+			params = dict(request.GET)
+			if len(params.keys()) == 0: return malformedRequest("Use the <i>username</i> parameter to search a user")
+			return usersInRange(params)
+
 		if request.method == 'POST': return createUserIfPossible(request)
 		return wrongMethod()
 
