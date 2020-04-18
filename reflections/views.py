@@ -105,29 +105,14 @@ def reflections(request, reflectionId = None):
 
 	return wrongMethod()
 
-@csrf_exempt
-def shareReflection(request, reflectionId):
 
-	if not request.user.is_authenticated: return authenticationNeeded()
+# -------- Share reflection methods
 
-	if not request.method == 'POST': return wrongMethod()
-
-	reflection = fetchReflection(reflectionId)
-
-	if not reflection: return malformedRequest()
-	if not reflection.owner == request.user: return error("Not authorized")
-
-	shareWith = json.loads(request.POST.get('shareWith'))
-	reflection = fetchReflection(reflectionId)
-
-	if not shareWith: return malformedRequest()
-	if not reflection: return error("Could not find reflection")
-
-	shareWith.remove(request.user.pk)
+def _shareReflection(users, reflection):
 
 	resp = []
 
-	for uId in shareWith:
+	for uId in users:
 		user = User.objects.get(pk = uId)
 
 		if not user:
@@ -144,6 +129,31 @@ def shareReflection(request, reflectionId):
 
 
 	return formattedModelArray(reflection.sharedWith.all())
+def cancelShare(users, reflection): pass
+
+@csrf_exempt
+def shareReflection(request, reflectionId):
+
+	if not request.user.is_authenticated: return authenticationNeeded()
+
+	reflection = fetchReflection(reflectionId)
+
+	if not reflection: return malformedRequest()
+	if not reflection.owner == request.user: return error("Not authorized")
+
+	if request.method == 'GET':   return formattedModelArray(reflection.sharedWith.all())
+
+	users = json.loads(request.POST.get('shareWith'))
+
+	if not users: return malformedRequest()
+
+	users.remove(request.user.pk)
+
+	if request.method == 'POST': return _shareReflection(shareWith, reflection)
+	if request.method == 'DELETE': return cancelShare(shareWith, reflection)
+
+	return wrongMethod()
+
 
 # -------- User methods
 def fetchUser(userId): return fetchObject(User, userId)
