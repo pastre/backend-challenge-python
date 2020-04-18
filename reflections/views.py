@@ -67,11 +67,13 @@ def reflectionsInRange(params):
 		return error("Failed to parse date")
 
 # -------- Reflection methods
-def createReflection(text, owner): 
-	newReflection = Reflection(content = text, owner = owner)
+def createReflection(text, owner, isPublic = True): 
+	print("isPublic", isPublic)
+	newReflection = Reflection(content = text, owner = owner, isPublic = isPublic)
 	newReflection.save()
 	reflection = Reflection.objects.get(pk = newReflection.pk)
 	return  success({"reflection": (reflection.toDict())})
+
 def updateReflection(reflectionId, newReflection): pass # TODO
 def getReflections(user):
 	return Reflection.objects.filter(owner = user)
@@ -89,9 +91,9 @@ def reflections(request, reflectionId = None):
 
 		if request.method == 'POST': 
 			content = request.POST.get("content")
-
+			isPublic = request.POST.get("isPublic")
 			if not content: return error("porra brow")
-			return createReflection(content, request.user)
+			return createReflection(content, request.user, True if (isPublic == None or isPublic) else False)
 		
 		return wrongMethod()
 

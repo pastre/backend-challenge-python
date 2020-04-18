@@ -1,4 +1,4 @@
-from django.db.models import Model, CharField, IntegerField, ForeignKey, DateTimeField, DecimalField, EmailField, CASCADE, ManyToManyField
+from django.db.models import Model, CharField, IntegerField, ForeignKey, DateTimeField, BooleanField, EmailField, CASCADE, ManyToManyField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User as AbstractUser
 
@@ -23,10 +23,14 @@ class Reflection(Model):
 	owner = ForeignKey(User, on_delete = CASCADE, null = True,  related_name = "owner")
 	sharedWith = ManyToManyField(User,  related_name = "sharedWith")
 
+
+	isPublic = BooleanField(default = True)
+
 	def toDict(self):
 		return  {
 			"id": self.pk,
 			"content": self.content,
 			"createdAt": self.createdAt.timestamp(),
+			"isPublic": self.isPublic
 		}
 
