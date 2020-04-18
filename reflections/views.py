@@ -86,7 +86,7 @@ def reflections(request, reflectionId = None):
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
-			if len(params.keys()) == 0: return formattedModelArray(getReflections(request.user))
+			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.filter(isPublic = True))
 			return reflectionsInRange(params)
 
 		if request.method == 'POST': 
