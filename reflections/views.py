@@ -32,7 +32,7 @@ def payload(message, status):
 		json.dumps( {"status": status, "payload": message} if not message == None else { "status": status } )
 	) 
 def error(message): return payload(message, "error")
-def success(message): return payload(message, "success")
+def success(message = None): return payload(message, "success")
 
 def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
 def malformedRequest(): return HttpResponse(f'malformedRequest')
@@ -71,12 +71,8 @@ def reflectionsInRange(params):
 def createReflection(text, owner): 
 	newReflection = Reflection(content = text, owner = owner)
 	newReflection.save()
-
-	return  getReflection(newReflection.pk)
-def getReflection(reflectionId, user):
-	reflection = fetchReflection(reflectionId)
-
-	if not reflection: return malformedRequest()
+	reflection = Reflection.objects.get(pk = newReflection.pk)
+	return  success({"reflection": (reflection.toDict())})
 
 	
 def updateReflection(reflectionId, newReflection): pass # TODO
@@ -118,6 +114,21 @@ def reflections(request, reflectionId = None):
 
 	return wrongMethod()
 
+@csrf_exempt
+def shareReflection(request, reflectionId):
+
+	if not request.user.is_authenticated: return authenticationNeeded()
+	if not request.method == 'POST': return wrongMethod()
+
+	reflection = fetchReflection(reflectionId)
+	if not reflection: return malformedRequest()
+	if not reflection.owner == request.user: return error("Not authorized")
+
+	shareWith = request.POST.get('shareWith')
+
+	print("Share with", shareWith)
+
+	return success()
 # -------- User methods
 def fetchUser(userId): return fetchObject(User, userId)
 def createUserIfPossible(request):
@@ -195,4 +206,4 @@ def auth(request):
 def logout(request):
 	djangoLogout(request)
 
-	return success(None)
+	return success()
