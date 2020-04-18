@@ -35,22 +35,15 @@ def error(message): return payload(message, "error")
 def success(message = None): return payload(message, "success")
 
 def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
-def malformedRequest(): return HttpResponse(f'malformedRequest')
+def malformedRequest(message = 'malformedRequest'): return HttpResponse(message)
 def authenticationNeeded(): return error("Authentication required")
 
 # Fetches a reflection from the DB
-def fetchReflection(reflectionId):
-	return fetchObject(Reflection, reflectionId)
+def fetchReflection(reflectionId): return fetchObject(Reflection, reflectionId)
 
 # Formats a reflection from the DB
-def formattedModel(m):
-
-		serialized = json.dumps(m.toDict())
-		return HttpResponse(serialized)
-def formattedModelArray(a): 
-	asDict = [ i.toDict() for i in a]
-
-	return success(asDict)
+def formattedModel(m): 		return success(m.toDict())
+def formattedModelArray(a): return success([ i.toDict() for i in a])
 def reflectionsInRange(params):
 
 	if not 'from' in params.keys(): return malformedRequest()
@@ -73,8 +66,6 @@ def createReflection(text, owner):
 	newReflection.save()
 	reflection = Reflection.objects.get(pk = newReflection.pk)
 	return  success({"reflection": (reflection.toDict())})
-
-	
 def updateReflection(reflectionId, newReflection): pass # TODO
 def getReflections(user):
 	return Reflection.objects.filter(owner = user)
@@ -118,17 +109,42 @@ def reflections(request, reflectionId = None):
 def shareReflection(request, reflectionId):
 
 	if not request.user.is_authenticated: return authenticationNeeded()
+
 	if not request.method == 'POST': return wrongMethod()
 
 	reflection = fetchReflection(reflectionId)
+
 	if not reflection: return malformedRequest()
 	if not reflection.owner == request.user: return error("Not authorized")
 
-	shareWith = request.POST.get('shareWith')
+	shareWith = json.loads(request.POST.get('shareWith'))
+	reflection = fetchReflection(reflectionId)
 
-	print("Share with", shareWith)
+	if not shareWith: return malformedRequest()
+	if not reflection: return error("Could not find reflection")
 
-	return success()
+	shareWith.remove(request.user.pk)
+
+	resp = []
+
+	for uId in shareWith:
+		user = User.objects.get(pk = uId)
+
+		if not user:
+			resp.append({
+					"status": "failed",
+					"user": uId 
+				})
+			continue
+
+		reflection.sharedWith.add(user)
+
+
+	reflection.save()
+
+
+	return formattedModelArray(reflection.sharedWith.all())
+
 # -------- User methods
 def fetchUser(userId): return fetchObject(User, userId)
 def createUserIfPossible(request):
@@ -172,7 +188,8 @@ def users(request, userId = None):
 		if request.method == 'GET': 
 			if not isAuth: return authenticationNeeded()
 			params = dict(request.GET)
-			if len(params.keys()) == 0: return malformedRequest("Use the <i>username</i> parameter to search a user")
+			if len(params.keys()) == 0: return formattedModelArray(User.objects.all())
+
 			return usersInRange(params)
 
 		if request.method == 'POST': return createUserIfPossible(request)
