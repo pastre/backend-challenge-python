@@ -19,6 +19,12 @@ from  .models import *
 import json
 import datetime
 
+def getKeyFromBody(request, key):	
+	body_unicode = request.body.decode('utf-8')
+	body = json.loads(body_unicode)
+	return body.get(key)
+
+
 def fetchObject(obj, objId):
 
 	try:
@@ -110,26 +116,28 @@ def reflections(request, reflectionId = None):
 
 def _shareReflection(users, reflection):
 
-	resp = []
+	for uId in users:
+		user = User.objects.get(pk = uId)
+
+		if not user: continue
+
+		reflection.sharedWith.add(user)
+
+	reflection.save()
+
+	return formattedModelArray(reflection.sharedWith.all())
+def cancelShare(users, reflection): 
 
 	for uId in users:
 		user = User.objects.get(pk = uId)
 
-		if not user:
-			resp.append({
-					"status": "failed",
-					"user": uId 
-				})
-			continue
+		if not user: continue
 
-		reflection.sharedWith.add(user)
-
+		reflection.sharedWith.remove(user)
 
 	reflection.save()
 
-
 	return formattedModelArray(reflection.sharedWith.all())
-def cancelShare(users, reflection): pass
 
 @csrf_exempt
 def shareReflection(request, reflectionId):
@@ -141,16 +149,16 @@ def shareReflection(request, reflectionId):
 	if not reflection: return malformedRequest()
 	if not reflection.owner == request.user: return error("Not authorized")
 
-	if request.method == 'GET':   return formattedModelArray(reflection.sharedWith.all())
-
-	users = json.loads(request.POST.get('shareWith'))
-
+	if request.method == 'GET': return formattedModelArray(reflection.sharedWith.all())
+	
+	users = getKeyFromBody(request, 'users')
 	if not users: return malformedRequest()
 
 	users.remove(request.user.pk)
 
-	if request.method == 'POST': return _shareReflection(shareWith, reflection)
-	if request.method == 'DELETE': return cancelShare(shareWith, reflection)
+	if request.method == 'POST': return _shareReflection(users, reflection)
+
+	if request.method == 'DELETE': return cancelShare(users, reflection)
 
 	return wrongMethod()
 
