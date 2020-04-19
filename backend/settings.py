@@ -25,7 +25,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = "6)fer=_n-5_&i@ms*v%$ot$r=6i-ki@$=$m(b12gmbsp$b$ng*"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 
@@ -80,12 +80,26 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'd7t1ka3ei1a4bv',
+        'USER': 'vtrvzpnvryllbe',
+        'PASSWORD': 'c09ff8389731b036de1c10bb00803091acbb57e6721e50433f8f4d237b4b441f',
+        'HOST': 'ec2-35-171-31-33.compute-1.amazonaws.com',
+        'PORT': '5432',
     }
 }
+
+if DEBUG:
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
