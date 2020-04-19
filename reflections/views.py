@@ -164,6 +164,16 @@ def shareReflection(request, reflectionId):
 
 	return wrongMethod()
 
+@csrf_exempt
+def userReflections(request, userId):
+
+	if not request.user.is_authenticated: return authenticationNeeded()
+	user = fetchUser(userId)
+	
+	if not user: return error("User not found")
+	reflections = Reflection.objects.filter(owner = user, isPublic = user != request.user)
+
+	return formattedModelArray(reflections)
 
 # -------- User methods
 def fetchUser(userId): return fetchObject(User, userId)

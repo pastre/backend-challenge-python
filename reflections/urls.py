@@ -8,7 +8,8 @@ urlpatterns = [
 	path('reflections', views.reflections, name='reflections'),
 
 	path('users', views.users, name='users'),
-	path('users/<int:userId>', views.users, name='users'),
+	path('users/<int:userId>', views.users, name='user'),
+	path('users/<int:userId>/reflections', views.userReflections, name='userReflections'),
 
 
 	path('auth', views.auth, name='auth'),
