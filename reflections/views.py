@@ -235,7 +235,7 @@ def users(request, userId = None):
 # -------- Auth methods
 @csrf_exempt
 def auth(request):
-	if not request.method == 'POST': wrongMethod()
+	if not request.method == 'POST': return wrongMethod()
 
 	username = request.POST['username']
 	password = request.POST['password']
