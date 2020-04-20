@@ -37,7 +37,7 @@ def payload(message, status):
 	return HttpResponse(
 		json.dumps( {"status": status, "payload": message} if not message == None else { "status": status } )
 	) 
-def error(message): return payload({"errorMessage": message}, "error")
+def error(message): return payload(message, "error")
 def success(message = None): return payload(message, "success")
 
 def wrongMethod(): return HttpResponseForbidden('Wrong method, sorry')
