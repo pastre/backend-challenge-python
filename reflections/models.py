@@ -31,6 +31,7 @@ class Reflection(Model):
 			"id": self.pk,
 			"content": self.content,
 			"createdAt": self.createdAt.timestamp(),
-			"isPublic": self.isPublic
+			"isPublic": self.isPublic,
+			'owner': self.owner.toDict()
 		}
 
