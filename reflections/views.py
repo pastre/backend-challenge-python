@@ -178,24 +178,25 @@ def userReflections(request, userId):
 # -------- User methods
 def fetchUser(userId): return fetchObject(User, userId)
 def createUserIfPossible(request):
-	payload = request.POST
-	required = ['username', 'email', 'password',]
-	
-	# Se esta faltando algum parametro, retorne erro
-	for req in required: 
-		if not req in payload.keys(): return malformedRequest()
 
-	username, email, password = [payload.get(i) for i in required]
+	username = getKeyFromBody(request, 'username')
+	password = getKeyFromBody(request, 'password')
+	email = getKeyFromBody(request, 'password')
+
+	if not username: return malformedRequest()
+	if not password: return malformedRequest()
+	if not email: return malformedRequest()
 
 	try:
 		user = User.objects.create_user(username = username, email=email, password=password )
 		user.save()
 
-
 		login(request, user)
 
 		return formattedModel(user)
+
 	except IntegrityError: return error("User already exists")
+	
 def deleteUserIfPossible(userId):
 	user = fetchUser(userId)
 
