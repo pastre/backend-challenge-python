@@ -236,12 +236,13 @@ def users(request, userId = None):
 @csrf_exempt
 def auth(request):
 	if not request.method == 'POST': return wrongMethod()
-	isValidRequest = ('username' in request.POST.keys() ) and ('password' in request.POST.keys())
 
-	if not isValidRequest: return error("Malformed request. Your body must contain username and password")
+	username = getKeyFromBody(request, 'username')
+	password = getKeyFromBody(request, 'password')
 
-	username = request.POST['username']
-	password = request.POST['password']
+	if not username: return malformedRequest()
+	if not password: return malformedRequest()
+
 	user = authenticate(request, username=username, password=password)
 
 	if user is not None:
