@@ -120,8 +120,8 @@ def reflections(request, reflectionId = None):
 def _shareReflection(users, reflection):
 
 	for uId in users:
-		user = User.objects.get(pk = uId)
-
+		try: user = User.objects.get(pk = uId)
+		except: continue
 		if not user: continue
 
 		reflection.sharedWith.add(user)
