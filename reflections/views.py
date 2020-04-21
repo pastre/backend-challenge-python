@@ -196,7 +196,7 @@ def createUserIfPossible(request):
 		return formattedModel(user)
 
 	except IntegrityError: return error("User already exists")
-	
+
 def deleteUserIfPossible(userId):
 	user = fetchUser(userId)
 
@@ -249,7 +249,7 @@ def auth(request):
 	if user is not None:
 		login(request, user)
 		myUser = User.objects.get(pk = user.pk)
-		return success({"user": myUser.toDict()})
+		return success(myUser.toDict())
 
 	else: return error("Authentication failed")
 
