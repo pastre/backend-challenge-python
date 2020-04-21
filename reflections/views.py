@@ -19,10 +19,12 @@ from  .models import *
 import json
 import datetime
 
-def getKeyFromBody(request, key):	
-	body_unicode = request.body.decode('utf-8')
-	body = json.loads(body_unicode)
-	return body.get(key)
+def getKeyFromBody(request, key):
+	try:
+		body_unicode = request.body.decode('utf-8')
+		body = json.loads(body_unicode)
+		return body.get(key)
+	except: return None
 
 
 def fetchObject(obj, objId):
@@ -172,7 +174,11 @@ def userReflections(request, userId):
 	user = fetchUser(userId)
 	
 	if not user: return error("User not found")
-	reflections = Reflection.objects.filter(owner = user, isPublic = user != request.user)
+
+	isPublic = not (user == request.user)
+
+	reflections = Reflection.objects.filter(owner = user)
+	if isPublic: reflections = reflections.filter(isPublic = True)
 
 	return formattedModelArray(reflections)
 
@@ -241,6 +247,8 @@ def auth(request):
 
 	username = getKeyFromBody(request, 'username')
 	password = getKeyFromBody(request, 'password')
+
+	print(username, password)
 
 	if not username: return malformedRequest()
 	if not password: return malformedRequest()
