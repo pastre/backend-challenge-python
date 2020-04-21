@@ -68,12 +68,13 @@ def reflectionsInRange(params):
 
 # -------- Reflection methods
 def createReflection(text, owner, isPublic = True): 
-	print("isPublic", isPublic)
+
 	newReflection = Reflection(content = text, owner = owner, isPublic = isPublic)
 	newReflection.save()
-	reflection = Reflection.objects.get(pk = newReflection.pk)
-	return  success(reflection.toDict())
 
+	reflection = Reflection.objects.get(pk = newReflection.pk)
+
+	return  success(reflection.toDict())
 def updateReflection(reflectionId, newReflection): pass # TODO
 def getReflections(user):
 	return Reflection.objects.filter(owner = user)
