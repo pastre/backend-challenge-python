@@ -72,7 +72,7 @@ def createReflection(text, owner, isPublic = True):
 	newReflection = Reflection(content = text, owner = owner, isPublic = isPublic)
 	newReflection.save()
 	reflection = Reflection.objects.get(pk = newReflection.pk)
-	return  success({"reflection": (reflection.toDict())})
+	return  success(reflection.toDict())
 
 def updateReflection(reflectionId, newReflection): pass # TODO
 def getReflections(user):
@@ -90,7 +90,7 @@ def reflections(request, reflectionId = None):
 			return reflectionsInRange(params)
 
 		if request.method == 'POST': 
-			content = request.POST.get("content")
+			content = getKeyFromBody(request, "content")
 			isPublic = request.POST.get("isPublic")
 			if not content: return error("porra brow")
 			return createReflection(content, request.user, True if (isPublic == None or isPublic) else False)
