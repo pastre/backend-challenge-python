@@ -13,13 +13,15 @@
 
 :heavy_check_mark: User & UserReflection CRUD
 
+:heavy_check_mark: User Authentication
+
 :heavy_check_mark: Reflection sharing
 
 :heavy_check_mark: Deploy @ Heroku https://ada-backend-challenge.herokuapp.com/. Documentation coming soon
 
 
 
-:x: #### Documentation
+:x: API Documentation
 
 :x: UserReflection searching
 
