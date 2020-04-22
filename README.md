@@ -11,6 +11,8 @@
 
 :heavy_check_mark: User & UserReflection model
 
+:heavy_check_mark: User & UserReflection CRUD
+
 :heavy_check_mark: Reflection sharing
 
 :heavy_check_mark: Deploy @ Heroku
