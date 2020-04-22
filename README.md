@@ -1,7 +1,9 @@
 # Deployed at https://ada-backend-challenge.herokuapp.com/. Documentation coming soon
+:heavy_check_mark:
 
 ## Challenges
-    :heavy_check_mark: Reflection model
+    :heavy_check_mark:
+    Reflection model
     :heavy_check_mark: Database connection
     :heavy_check_mark: Reflection CRUD
     :heavy_check_mark: Reflection searching
