@@ -1,4 +1,4 @@
-# Deployed at https://ada-backend-challenge.herokuapp.com/. Documentation coming soon
+# Reflections
 
 ## Challenges
 :heavy_check_mark:Reflection model
@@ -15,9 +15,12 @@
 
 :heavy_check_mark: Reflection sharing
 
-:heavy_check_mark: Deploy @ Heroku
+:heavy_check_mark: Deploy @ Heroku https://ada-backend-challenge.herokuapp.com/. Documentation coming soon
 
 
+
+:x:
+#### Documentation
 
 :x: UserReflection searching
 
