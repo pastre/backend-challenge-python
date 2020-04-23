@@ -17,6 +17,7 @@ class User(AbstractUser):
 		}
 
 class Reflection(Model):
+	title = CharField(max_length = 10000, null = True)
 	content = CharField(max_length = 10000)
 	createdAt = DateTimeField(null=True, blank=True, auto_now = True)
 
@@ -29,6 +30,7 @@ class Reflection(Model):
 	def toDict(self):
 		return  {
 			"id": self.pk,
+			"title" : self.title,
 			"content": self.content,
 			"createdAt": self.createdAt.timestamp(),
 			"isPublic": self.isPublic,
