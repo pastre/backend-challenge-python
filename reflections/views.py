@@ -94,7 +94,7 @@ def reflections(request, reflectionId = None):
 
 		if request.method == 'POST': 
 			content = getKeyFromBody(request, "content")
-			isPublic = request.POST.get("isPublic")
+			isPublic = getKeyFromBody(request, "isPublic")
 			if not content: return error("porra brow")
 			return createReflection(content, request.user, True if (isPublic == None or isPublic) else False)
 		
