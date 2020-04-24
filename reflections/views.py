@@ -100,6 +100,8 @@ def reflections(request, reflectionId = None):
 			if not title: return error("Could not find parameter: title")
 			if not content: return error("Could not find parameter: content")
 
+			print("TITLE is", title)
+
 			return createReflection(title, content, request.user, True if (isPublic == None or isPublic) else False)
 		
 		return wrongMethod()
@@ -109,7 +111,26 @@ def reflections(request, reflectionId = None):
 	if not reflection: return malformedRequest()
 	if not reflection.owner == request.user: return error("Not authorized")
 
-	if request.method == 'PUT': pass # TODO
+	if request.method == 'PUT':
+
+		title = getKeyFromBody(request, "title")
+		content = getKeyFromBody(request, "content")
+		isPublic = getKeyFromBody(request, "isPublic")
+
+		title = title if title  else reflection.title
+		content = content if content  else reflection.content
+		isPublic = isPublic if isPublic  else reflection.isPublic
+
+
+		reflection.title = title
+		reflection.content = content
+		reflection.isPublic = isPublic
+
+
+		reflection.save()
+
+		return success(Reflection.objects.get(pk = reflection.pk).toDict())
+
 	if request.method == 'GET': return formattedModel(reflection)
 	if request.method == 'DELETE':
 		reflection.delete()
