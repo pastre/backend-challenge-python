@@ -119,7 +119,7 @@ def reflections(request, reflectionId = None):
 
 		title = title if title  else reflection.title
 		content = content if content  else reflection.content
-		isPublic = isPublic if isPublic  else reflection.isPublic
+		isPublic = isPublic if (not isPublic == None)  else reflection.isPublic
 
 
 		reflection.title = title
