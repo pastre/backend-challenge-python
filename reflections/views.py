@@ -8,14 +8,16 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.csrf import csrf_exempt
 
+from django.db.models import Q
+
 from django.db.utils import IntegrityError 
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import  logout as djangoLogout
 
-from  .models import *
 
+from  .models import *
 import json
 import datetime
 
@@ -89,7 +91,7 @@ def reflections(request, reflectionId = None):
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
-			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.filter(isPublic = True))
+			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.filter(Q(isPublic = True) | Q(sharedWith__pk__contains = request.user.pk))
 			return reflectionsInRange(params)
 
 		if request.method == 'POST': 

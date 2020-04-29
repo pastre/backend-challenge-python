@@ -22,7 +22,7 @@ class Reflection(Model):
 	createdAt = DateTimeField(null=True, blank=True, auto_now = True)
 
 	owner = ForeignKey(User, on_delete = CASCADE, null = True,  related_name = "owner")
-	sharedWith = ManyToManyField(User,  related_name = "sharedWith")
+	sharedWith = ManyToManyField(User,  related_name = "sharedWith", blank = True, null = True)
 
 
 	isPublic = BooleanField(default = True)
