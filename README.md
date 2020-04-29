@@ -19,9 +19,9 @@
 
 :heavy_check_mark: Deploy @ Heroku https://ada-backend-challenge.herokuapp.com/. Documentation coming soon
 
+:heavy_check_mark: API Documentation: Deploy @ APIMatic https://www.apimatic.io/apidocs/dada-backend-challenge/v/1_0#/http/getting-started
 
 
-:x: API Documentation
 
 :x: UserReflection searching
 
