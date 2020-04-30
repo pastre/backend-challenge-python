@@ -21,13 +21,15 @@
 
 :heavy_check_mark: API Documentation: Deploy @ APIMatic https://www.apimatic.io/apidocs/dada-backend-challenge/v/1_0#/http/getting-started
 
+:heavy_check_mark: OAuth Apple/Google/OneLgin
+
+:heavy_check_mark: SwiftUI frontend
+
 
 
 :x: UserReflection searching
 
-:x: OAuth Apple/Google/OneLgin
-
 :x: Media reflections
 
-:x: SwiftUI frontend
+
 
