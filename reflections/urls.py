@@ -13,6 +13,7 @@ urlpatterns = [
 
 
 	path('auth', views.auth, name='auth'),
+	path('auth/apple', views.signInWithApple, name='signInWithApple'),
 
 	path('logout', views.logout, name='logout'),
 ]

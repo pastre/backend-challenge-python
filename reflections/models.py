@@ -1,6 +1,7 @@
 from django.db.models import Model, CharField, IntegerField, ForeignKey, DateTimeField, BooleanField, EmailField, CASCADE, ManyToManyField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User as AbstractUser
+from django.contrib.auth.base_user import AbstractBaseUser
 
 # Entrypoint para extendermos um usuario
 class User(AbstractUser):
@@ -15,6 +16,16 @@ class User(AbstractUser):
 			"id": self.pk,
 			"email": self.email,
 		}
+class TwoFAUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(_('email address'), unique=True)
+	uid = CharField(max_length = 10000, null = True)
+
+	username = CharField(max_length = 10000, null = True)
+	
+    date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
+
+    REQUIRED_FIELDS = []
+
 
 class Reflection(Model):
 	title = CharField(max_length = 10000, null = True)

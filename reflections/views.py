@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import  logout as djangoLogout
 
+from .sign_in_with_apple import *
 
 from  .models import *
 import json
@@ -91,7 +92,7 @@ def reflections(request, reflectionId = None):
 	if reflectionId == None: 
 		if request.method == 'GET': 
 			params = dict(request.GET)
-			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.filter(Q(isPublic = True) | Q(sharedWith__pk__contains = request.user.pk))
+			if len(params.keys()) == 0: return formattedModelArray(Reflection.objects.filter(Q(isPublic = True) | Q(sharedWith__pk__contains = request.user.pk)))
 			return reflectionsInRange(params)
 
 		if request.method == 'POST': 
@@ -288,6 +289,22 @@ def auth(request):
 		return success(myUser.toDict())
 
 	else: return error("Authentication failed")
+
+@csrf_exempt
+def signInWithApple(request):
+	if not request.method == 'POST': return wrongMethod()
+
+	authCode = getKeyFromBody(request, "authorizationCode")
+	username = getKeyFromBody(request, "username")
+
+	if not authCode: return malformedRequest()
+	if not username: return malformedRequest()
+
+	user = AppleOAuth2().do_auth(authCode)
+
+	login(request, user)
+
+	return success()
 
 
 @csrf_exempt
