@@ -298,13 +298,16 @@ def signInWithApple(request):
 	username = getKeyFromBody(request, "username")
 
 	if not authCode: return malformedRequest()
-	if not username: return malformedRequest()
 
-	user = AppleOAuth2().do_auth(authCode)
+	user = AppleOAuth2().do_auth(authCode, username)
+	print("User is", user)
 
+	if not user: return error("Two factor Authentication failed!")
+	print("User is", user)
 	login(request, user)
 
-	return success()
+	myUser = User.objects.get(pk = user.pk)
+	return success(myUser.toDict())
 
 
 @csrf_exempt

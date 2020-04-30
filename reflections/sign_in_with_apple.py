@@ -4,8 +4,14 @@ from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 
-from .models import TwoFAUser
+from .models import TwoFAUser, User
 
+import random
+import string
+
+def randomStringwithDigitsAndSymbols(stringLength=10):
+    password_characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(password_characters) for i in range(stringLength))
 
 class AppleOAuth2():
     """apple authentication backend"""
@@ -16,7 +22,6 @@ class AppleOAuth2():
     ID_KEY = 'uid'
 
     def do_auth(self, access_token, username):
-        print("AE CUSAO", access_token)
         """
         Finish the auth process once the access_token was retrieved
         Get the email from ID token received from apple
@@ -35,31 +40,27 @@ class AppleOAuth2():
         res = requests.post(AppleOAuth2.ACCESS_TOKEN_URL, data=data, headers=headers)
         response_dict = res.json()
         id_token = response_dict.get('id_token', None)
-        print(res.status_code, res.text)
-        print("AE CUSAO",  response_dict)
         if id_token:
             decoded = jwt.decode(id_token, '', verify=False)
             response_data.update({'email': decoded['email']}) if 'email' in decoded else None
             response_data.update({'uid': decoded['sub']}) if 'sub' in decoded else None
-            print("AE CUSAO", decoded, decoded['email'],  decoded['sub'], response_dict)
 
         response = {}
         response.update(response_data)
         response.update({'access_token': access_token}) if 'access_token' not in response else None
 
-        user = TwoFAUser.objects.get(uid = response_data['uid'])
+        try: 
+            user = TwoFAUser.objects.get(uid = response_data['uid'])
+            return user.user
+        except:
 
-        if not user:
-        		newUser = TwoFAUser(
-        			email = response_data['email']
-					uid = response_data['uid']
-					username = username
-					)
-        		newUser.save()
-        		user = newUser
-        return user
+                newUser = User.objects.create_user(username = username, email=response_data['email'], password=randomStringwithDigitsAndSymbols(32) )
+                newUser.save()
 
-        print("falow", response)
+                new2FAUser = TwoFAUser(  user = newUser,  uid = response_data['uid'] )
+                new2FAUser.save()
+
+                return newUser
 
     def get_key_and_secret(self):
         headers = {

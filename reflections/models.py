@@ -1,4 +1,4 @@
-from django.db.models import Model, CharField, IntegerField, ForeignKey, DateTimeField, BooleanField, EmailField, CASCADE, ManyToManyField
+from django.db.models import Model, CharField, IntegerField, ForeignKey, DateTimeField, BooleanField, EmailField, CASCADE, ManyToManyField, OneToOneField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User as AbstractUser
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -16,16 +16,10 @@ class User(AbstractUser):
 			"id": self.pk,
 			"email": self.email,
 		}
-class TwoFAUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email address'), unique=True)
-	uid = CharField(max_length = 10000, null = True)
+class TwoFAUser(Model):
 
-	username = CharField(max_length = 10000, null = True)
-	
-    date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
-
-    REQUIRED_FIELDS = []
-
+	uid = CharField(max_length = 10000)
+	user = OneToOneField(User, on_delete=CASCADE)
 
 class Reflection(Model):
 	title = CharField(max_length = 10000, null = True)
@@ -33,7 +27,7 @@ class Reflection(Model):
 	createdAt = DateTimeField(null=True, blank=True, auto_now = True)
 
 	owner = ForeignKey(User, on_delete = CASCADE, null = True,  related_name = "owner")
-	sharedWith = ManyToManyField(User,  related_name = "sharedWith", blank = True, null = True)
+	sharedWith = ManyToManyField(User,  related_name = "sharedWith", blank = True)
 
 
 	isPublic = BooleanField(default = True)
