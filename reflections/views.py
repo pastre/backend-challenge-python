@@ -292,6 +292,7 @@ def auth(request):
 
 @csrf_exempt
 def signInWithApple(request):
+	print("Method is", request.method)
 	if not request.method == 'POST': return wrongMethod()
 
 	authCode = getKeyFromBody(request, "authorizationCode")
