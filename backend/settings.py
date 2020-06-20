@@ -17,7 +17,8 @@ import django_heroku
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
@@ -46,6 +47,7 @@ rcpCEQbuHa5a0N7zMpmHwx/0PV0lYGaeUCapxIBTwscIA2t4w5vVetDdN5vDmu/L
 
 INSTALLED_APPS = [
     'reflections.apps.ReflectionsConfig',
+    'aether.apps.AetherConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
