@@ -46,7 +46,7 @@ rcpCEQbuHa5a0N7zMpmHwx/0PV0lYGaeUCapxIBTwscIA2t4w5vVetDdN5vDmu/L
 # Application definition
 
 INSTALLED_APPS = [
-    'reflections.apps.ReflectionsConfig',
+    # 'reflections.apps.ReflectionsConfig',
     'aether.apps.AetherConfig',
     'django.contrib.admin',
     'django.contrib.auth',
